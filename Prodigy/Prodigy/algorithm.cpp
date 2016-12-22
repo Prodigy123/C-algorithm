@@ -134,10 +134,6 @@ private:
 
 int main(int argc, const char * argv[]) {
 //    Algorithm algorithm;
-    vector<int> A={3,23,12,3,24,33,2};
-//    sort(A.begin(),A.end());
-    for(auto i : A){
-        cout<<i<<endl;
-    }
+//    vector<int> A={3,23,12,3,24,33,2};
     return 0;
 }
