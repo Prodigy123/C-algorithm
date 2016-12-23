@@ -149,7 +149,7 @@ public:
         }
         return index;
     }
-    //8. Next Permutation 23/12/2016
+    //9. Next Permutation 23/12/2016
     void nextPermutation(vector<int>& nums){
         next_permutation(nums.begin(), nums.end());
     }
@@ -170,7 +170,7 @@ public:
         reverse(rfirst, pivot);
         return true;
     }
-    //9. valid sudoku 23/12/2016
+    //10. valid sudoku 23/12/2016
     bool isValidSudoku(const vector<vector<int>>& board){
         bool used[9];
         for(int i= 0; i < 9; i++){
@@ -203,6 +203,118 @@ public:
         if(used[ch - '1']) return false;
         return used[ch - '1'] = true;
     }
+    //11. trapping rain water 23/12/2016
+    int trapWater(vector<int>& nums){
+        int sum = 0;
+        const int n = int(nums.size());
+        vector<int>max_left(n);
+        vector<int>max_right(n);
+        for(int i = 1;i < n; i++){
+            max_left[i] = max(max_left[i-1],nums[i-1]);
+            max_right[n-i-1] = max(max_right[n-i],nums[n-i]);
+        }
+        for(int i = 1; i < n-1; i++){
+            int height = min(max_right[i],max_left[i]);
+            if(height > nums[i])
+                sum += height - nums[i];
+        }
+        return sum;
+    }
+    
+    //12. rotate image 23/12/2016
+    void rotate(vector<vector<int>> &matrix){
+        const int n = int(matrix.size());
+        for(int i = 0; i < n/2; i++){
+            for(int j = 0; j < n; j++){
+                swap(matrix[i][j],matrix [n-i-1][j]);
+            }
+        }
+        for(int i = 0; i < n; i++){
+            for(int j = i+1; j < n; j++){
+                swap(matrix[i][j],matrix[j][i]);
+            }
+        }
+    }
+    //13. plus one 23/12/2016
+    void plusOne(vector<int>& digits){
+        int c = 1;
+        for(auto it = digits.rbegin(); it != digits.rend(); it++){
+            *it += c;
+            c = *it/10;
+            *it %= 10;
+        }
+        if(c>0){digits.insert(digits.begin(), 1);}
+    }
+    //14. climb stairs 23/12/2016
+    int climbStairs(int n){
+        int prev = 0;
+        int cur = 1;
+        for(int i = 1; i <= n; i++){
+            int tem = cur;
+            cur += prev;
+            prev = tem;
+        }
+        return cur;
+    }
+    //15. generate gray code 23/12/2016
+    vector<int> grayCode(int n){
+        vector<int> result;
+        const int size = 1 << n;
+        result.reserve(size);
+        for(int i = 0; i<size; i++){
+            result.push_back(binary_to_gray(i));
+        }
+        return result;
+    }
+    //16. setZeros 23/12/2016
+    void setZeros(vector<vector<int>>& matrix){
+        const size_t rows = matrix.size();
+        const size_t columns = matrix[0].size();
+        bool row_has_zero = false;
+        bool column_has_zero = false;
+        for(size_t i = 0; i < rows; i++)
+        {
+            if(matrix[i][0] == 0)
+            {
+            row_has_zero = true;
+                break;
+            }
+        }
+        for(size_t i = 0; i < columns; i++)
+        {
+            if(matrix[0][i] == 0)
+            {
+                column_has_zero = true;
+                break;
+            }
+        }
+        for(size_t i = 1; i < rows; i++){
+            for(size_t j = 1; j < columns; j++){
+                if(matrix[i][j] == 0){
+                    matrix[i][0] = 0;
+                    matrix[0][j] = 0;
+                }
+            }
+        }
+        for(size_t i = 1; i < rows; i++){
+            for(size_t j = 1; j< columns; j++){
+                if(matrix[i][0] == 0 || matrix[0][j] == 0){
+                    matrix[i][j] = 0;
+                }
+            }
+        }
+        if(row_has_zero){
+            for(size_t i = 0; i < rows; i++){
+                matrix[i][0] = 0;
+            }
+        }
+        if(column_has_zero){
+            for(size_t i = 0; i < columns; i++){
+                matrix[0][i] = 0;
+            }
+        }
+    }
+    
     //private method
 private:
     //3. find median from two sorted array O(log(m+n)) 22/12/2016
@@ -218,13 +330,16 @@ private:
         else
             return A[ia-1];
     }
+    static int binary_to_gray(int i){
+        return i ^ (i >> 1);
+    }
 };
 
 int main(int argc, const char * argv[]) {
-//    Algorithm algorithm;
-//    vector<int> A={3,23,12,3,24,33,2};
-
-
+    Algorithm algorithm;
+    vector<int> A={0,1,0,2,1,0,1,3,2,1,2,1};
+    cout<<algorithm.trapWater(A)<<endl;
+ 
     return 0;
 
 }
