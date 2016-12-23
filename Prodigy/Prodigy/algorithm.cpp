@@ -93,6 +93,7 @@ public:
         vector<vector<int>> result;
         const int target = 0;
         if(nums.size() < 2) return result;
+        sort(nums.begin(),nums.end());
         auto last = nums.end();
         for(auto i = nums.begin(); i < last - 2; i++){
             auto j = i+1;
@@ -115,6 +116,93 @@ public:
         }
         return result;
     }
+    //7. Three Sum Closet 23/12/2016
+    int threeSumCloset(vector<int>& nums, int target){
+        int result = 0;
+        int sum = 0;
+        sort(nums.begin(), nums.end());
+        int min_gap = INT_MAX;
+        for(auto i = nums.begin(); i != prev(nums.end(),2); i++){
+            auto j = next (i);
+            auto k = prev(nums.end());
+            while(j<k){
+                sum = *j + *k + *i;
+                int gap = abs(sum - target);
+                if (gap < min_gap){
+                    min_gap = gap;
+                    result = sum;
+                }
+                if(sum<target) j++;
+                else k--;
+            }
+            
+        }
+        return result;
+    }
+    //8. Remove Element 23/12/2016
+    int removeElement(vector<int>& nums, int target){
+        int index = 0;
+        for(int i=0;i<nums.size();i++){
+            if(target != nums[i]){
+                nums[index++] = nums[i];
+            }
+        }
+        return index;
+    }
+    //8. Next Permutation 23/12/2016
+    void nextPermutation(vector<int>& nums){
+        next_permutation(nums.begin(), nums.end());
+    }
+    template<typename BitiIt>
+    bool next_permutation(BitiIt first,BitiIt last){
+        const auto rfirst = reverse_iterator<BitiIt>(last);
+        const auto rlast = reverse_iterator<BitiIt>(first);
+        auto pivot = next(rfirst);
+        while(pivot != rlast && *pivot > *prev(pivot)){
+            ++pivot;
+        }
+        while(pivot == rlast){
+            reverse(rfirst, rlast);
+            return false;
+        }
+        auto change = find_if(rfirst, pivot, bind1st(less<int>(), *pivot));
+        swap(*pivot, *change);
+        reverse(rfirst, pivot);
+        return true;
+    }
+    //9. valid sudoku 23/12/2016
+    bool isValidSudoku(const vector<vector<int>>& board){
+        bool used[9];
+        for(int i= 0; i < 9; i++){
+            fill(used, used+9, false);
+            //check rows
+            for(int j = 0; j < 9; j++){
+                if(!check(board[i][j],used)) return false;
+            }
+            fill(used, used+9, false);
+            //check columns
+            for(int j = 0; j < 9; j++){
+                if(!check(board[j][i],used)) return false;
+            }
+        }
+        //check little 9-box
+        for(int i = 0; i < 3; i++){
+            for(int j = 0; j < 3; j++){
+                fill(used, used+9, false);
+                for(int r = i*3; r < i*3+3; r++){
+                    for(int c = j*3; c < j*3+3; j++){
+                        if(!check(board[r][c],used)) return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+    bool check(char ch, bool used[9]){
+        if(ch == '.') return true;
+        if(used[ch - '1']) return false;
+        return used[ch - '1'] = true;
+    }
     //private method
 private:
     //3. find median from two sorted array O(log(m+n)) 22/12/2016
@@ -135,5 +223,8 @@ private:
 int main(int argc, const char * argv[]) {
 //    Algorithm algorithm;
 //    vector<int> A={3,23,12,3,24,33,2};
+
+
     return 0;
+
 }
