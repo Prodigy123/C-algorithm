@@ -9,9 +9,17 @@
 #include <iostream>
 #include <vector>
 #include <unordered_map>
+#include <numeric>
 using namespace std;
+// ListNode
+struct ListNode{
+    int val;
+    ListNode *next;
+    ListNode(int x): val(x), next(nullptr){}
+};
 class Algorithm{
 public:
+/********************* 数组 ******************************/
     // 1. remove (k)duplicats from sorted array  22/12/2016
     int removeDuplicates(vector<int>& nums, int k){
         if(nums.empty()) return 0;
@@ -276,7 +284,7 @@ public:
         {
             if(matrix[i][0] == 0)
             {
-            row_has_zero = true;
+                row_has_zero = true;
                 break;
             }
         }
@@ -314,8 +322,132 @@ public:
             }
         }
     }
-    
-    //private method
+    //17. gas stattion 24/12/2016
+    int gasStation(vector<int>& gas, vector<int>& cost){
+        int j = -1;
+        int total = 0;
+        int sum = 0;
+        for(int i = 0;i < gas.size(); i++){
+            sum += gas[i] - cost[i];
+            total += gas[i] - cost[i];
+            if(sum < 0){
+                j = i;
+                sum = 0;
+            }
+        }
+        return total >= 0 ? j+1 :  -1;
+    }
+    //18. allocate candy 24/12/2016
+    int candy(vector<int>& rating){
+        const int n = int(rating.size());
+        vector<int> increment(n);
+        for(int i = 1, inc = 1; i < n; i++){
+            if(rating[i] > rating[i-1])
+                //                increment[i] = max(inc++, increment[i]);
+                increment[i] = inc++ ;
+            else
+                inc = 1;
+        }
+        for(int i = n-2, inc = 1; i >= 0; i--){
+            if(rating[i] > rating[i+1]){
+                //                increment[i] = max(inc++,increment[i]);
+                increment[i] = inc++ ;
+            }else{ inc = 1;}
+        }
+        return accumulate(&increment[0], &increment[0]+n, n);
+    }
+    //19. single number 24/12/2016
+    int findSingleNum(vector<int>& nums){
+        int x = 0;
+        for(auto i: nums){
+            x ^= i;
+        }
+        return x;
+    }
+    //20. find the missing one (sorted array) 24/12/2016
+    int findTheMissing(vector<int>& nums){
+        int i = int(nums.size()) + 1;
+        return find(nums.begin(),i,1);
+    }
+    int find(vector<int>::iterator it, int size, int begin)
+    {   int result = begin;
+        int x = 0;
+        auto this_start = it;
+        while(it != this_start + size/2){
+            int tmp = result;
+            if(*it < begin + size/2){
+                tmp = result ^ *it;
+            }
+            x ^= tmp;
+            result++;
+            it++;
+        }
+        if(!*it) return result;
+        if(x != 0) return x;
+        else{return find(it, size - size/2, result);}
+    }
+    //21. single numbers from 3* 24/12/2016
+    int findSingleFrom3(vector<int>& nums){
+        int result = 0;
+        const int bits = sizeof(int)*8;
+        vector<int> count(bits);
+        for(int i = 0; i < nums.size(); i++){
+            for(int j = 0; j < bits; j++)
+            {
+                count[j] += (nums[i] >> j) & 1;
+                count[j] %= 3;
+            }
+        }
+        for(int i = 0; i< bits; i++){
+            result += count[i] << i;
+        }
+        return result;
+    }
+    /******************** 单链表 ******************************/
+    //22. add Two Nums 24/12/2016
+    ListNode *addTwoNumbers(ListNode *L1, ListNode* L2){
+        int carry = 0;
+        ListNode dummy(-1);
+        ListNode *prev = &dummy;
+        for(ListNode *pa = L1, *pb = L2;
+            pa != nullptr || pb != nullptr;
+            pa = pa == nullptr ? nullptr : pa->next,
+            pb = pb == nullptr ? nullptr : pb->next,
+            prev = prev->next
+            ){
+            const int ai = pa == nullptr? 0 : pa->val;
+            const int bi = pb == nullptr? 0 : pb->val;
+            const int value = (ai + bi + carry)% 10;
+            carry = (ai + bi + carry)/10;
+            prev -> next = new ListNode(value);
+        }
+        if(carry>0){
+            prev->next = new ListNode(carry);
+        }
+        return dummy.next;
+    }
+    //23. partition a List 24/12/2016
+    ListNode *partition(ListNode *head, int x){
+        ListNode left_dummy(-1);
+        ListNode right_dummy(-1);
+        auto left_prev = &left_dummy;
+        auto right_prev = &right_dummy;
+        for(auto cur = head; cur; cur = cur->next){
+            if(cur->val < x){
+                left_prev->next = cur;
+                left_prev = cur;
+            }
+            if(cur->val > x){
+                right_prev->next = cur;
+                right_prev = cur;
+            }
+        }
+        left_prev->next = right_dummy.next;
+        right_prev->next = nullptr;
+        return left_dummy.next;
+    }
+
+    //private methods
 private:
     //3. find median from two sorted array O(log(m+n)) 22/12/2016
     static int find_kth(vector<int>::const_iterator A, int m, vector<int>::const_iterator B, int n, int k){
@@ -336,10 +468,11 @@ private:
 };
 
 int main(int argc, const char * argv[]) {
-    Algorithm algorithm;
-    vector<int> A={0,1,0,2,1,0,1,3,2,1,2,1};
-    cout<<algorithm.trapWater(A)<<endl;
- 
+//    Algorithm algorithm;
+//    vector<int> A={1,2,3,4,5,7,8,9};
+//    cout<<algorithm.findTheMissing(A)<<endl;
+    cout<<sizeof(int)<<endl;
+    
     return 0;
-
+    
 }
