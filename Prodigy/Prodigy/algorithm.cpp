@@ -10,6 +10,7 @@
 #include <vector>
 #include <unordered_map>
 #include <numeric>
+#include <list>
 using namespace std;
 // ListNode
 struct ListNode{
@@ -19,7 +20,7 @@ struct ListNode{
 };
 class Algorithm{
 public:
-/********************* 数组 ******************************/
+    /********************* 数组 ******************************/
     // 1. remove (k)duplicats from sorted array  22/12/2016
     int removeDuplicates(vector<int>& nums, int k){
         if(nums.empty()) return 0;
@@ -446,7 +447,171 @@ public:
         right_prev->next = nullptr;
         return left_dummy.next;
     }
-
+    //24. remove duplicates from sorted list 25/12/2016
+    ListNode *remove(ListNode *head){
+        if(!head || !head->next) return head;
+        ListNode dummy = ListNode(-1);
+        dummy.next = head;
+        recur(&dummy,head);
+        return dummy.next;
+    }
+    //25. remove duplicates and self from sorted list 25/12/2016
+    ListNode *removeDandS(ListNode *head){
+        if(!head || !head->next) return head;
+        ListNode *p = head->next;
+        if(p->val == head->val){
+            ListNode *tmp = p;
+            p = p->next;
+            delete tmp;
+            delete head;
+            return removeDandS(p);
+        }else{
+            head->next = removeDandS(p->next);
+            return head;
+        }
+    }
+    //26. Rotate List 25/12/2016
+    ListNode *rotateList(ListNode*head, int k){
+        if(!head || !head->next) return head;
+        ListNode *p = head;
+        int len = 1;
+        while(p->next){
+            len++;
+            p = p->next;
+        }
+        k = len - k%len;
+        head = p->next;
+        for(int step = 0; step < k; step++){
+            p = p -> next;
+        }
+        head = p->next;
+        p->next = nullptr;
+        return head;
+    }
+    //27. remove nth node from end of the list 25/12/2016
+    ListNode *delenth(ListNode *head, int n){
+        ListNode dummy = ListNode(-1);
+        dummy.next = head;
+        ListNode *p = &dummy, *q = &dummy;
+        for(int i = 0; i < n; i++){
+            q = q->next;
+        }
+        while(q->next){
+            p = p->next;
+            q = q->next;
+        }
+        ListNode *tmp = p->next;
+        p->next = p->next->next;
+        delete tmp;
+        return dummy.next;
+    }
+    //28. swap nodes in pair 25/12/2016
+    ListNode *swapList(ListNode *head){
+        if(!head || !head->next) return head;
+        ListNode dummy = ListNode(-1);
+        dummy.next = head;
+        for(ListNode *prev = &dummy,
+            *cur = prev->next,
+            *next = cur == nullptr ? nullptr : cur->next;
+            next;
+            cur = prev->next,
+            next = cur ? cur->next : nullptr
+            ){
+            prev->next = next;
+            cur->next = next->next;
+            next->next = cur;
+            prev = cur;
+        }
+        return dummy.next;
+    }
+    //29. reverse Kgroup 25/12/2016
+    ListNode *reverseKgroup(ListNode *head, int k){
+        if(!head || !head->next || k < 2) return head;
+        ListNode *new_group = head;
+        for(int i = 0; i < k; i++){
+            if(new_group->next){
+                new_group = new_group->next;
+            }else{
+                return head;
+            }
+        }
+        ListNode *new_group_head = reverseKgroup(new_group, k);
+        ListNode *prev = NULL,*cur = head;
+        while(cur != new_group){
+            ListNode *next = cur->next;
+            cur->next = prev ? prev : new_group_head;
+            prev = cur;
+            cur = next;
+        }
+        return prev;
+    }
+    //30. check Cycle 25/12/2016
+    bool isCycle(ListNode *head){
+        ListNode *slow = head,*fast = head;
+        while(fast && fast->next){
+            fast = fast->next->next;
+            slow = slow->next;
+            if(slow == fast) return  true;
+        }
+        return false;
+    }
+    //31. linked list cycle(find the cycle begin point) 25/12/2016
+    ListNode *findCyclePoint(ListNode *head){
+        ListNode *fast = head, *slow = head;
+        while(fast && fast->next){
+            fast = fast->next->next;
+            slow = slow->next;
+            while(fast == slow){
+                ListNode *slow2 = head;
+                while(slow != slow2){
+                    slow = slow->next;
+                    slow2 = slow2->next;
+                }
+                return slow2;
+            }
+        }
+        return nullptr;
+    }
+    //32. reordered List 25/12/2016
+    ListNode *reorder(ListNode *head){
+        if(!head || !head->next) return head;
+        ListNode dummy = ListNode(-1);
+        dummy.next = head;
+        ListNode *slow = head, *fast = head, *prev = nullptr;
+        while(fast && fast->next){
+            prev = slow;
+            slow = slow->next;
+            fast = fast->next->next;
+        }
+        prev->next = nullptr;
+        slow = reverseHalf(slow);
+        ListNode *cur = head;
+        //merge lists
+        while(cur->next)
+        {
+            ListNode *tmp = cur->next;
+            cur->next = slow;
+            slow = slow->next;
+            cur->next->next = tmp;
+            cur = tmp;
+        }
+        cur->next = slow;
+        return dummy.next;
+    }
+    
+    ListNode *reverseHalf(ListNode *head){
+        ListNode *prev = head;
+        for(ListNode *cur = head->next, *next = cur->next;
+            cur;
+            ){
+            cur->next = prev;
+            prev = cur;
+            cur = next;
+            next = next ? next->next : nullptr;
+        }
+        head->next = nullptr;
+        return prev;
+    }
     //private methods
 private:
     //3. find median from two sorted array O(log(m+n)) 22/12/2016
@@ -465,13 +630,57 @@ private:
     static int binary_to_gray(int i){
         return i ^ (i >> 1);
     }
+    //24. remove duplicates from sorted list
+    static void recur(ListNode *prev, ListNode *cur){
+        if(cur == nullptr) return;
+        if(prev->val == cur->val){
+            prev->next = cur->next;
+            delete cur;
+            recur(prev,prev->next);
+        }else{
+            recur(prev->next,cur->next);
+        }
+    }
 };
-
+class LRUcache{
+private:
+    struct Node{
+        int key;
+        int value;
+        Node(int key, int value): key(key),value(value){}
+    };
+    int capacity;
+    list<Node> lrulist;
+    unordered_map<int, list<Node>::iterator> lrumap;
+public:
+    LRUcache(int capacity):capacity(capacity){}
+    int get(int key){
+        if(lrumap.find(key) == lrumap.end()) return -1;
+        lrulist.splice(lrulist.begin(),lrulist,lrumap[key]);
+        lrumap[key] = lrulist.begin();
+        return lrumap[key]->value;
+    }
+    void set(int key, int value){
+        if(lrumap.find(key) == lrumap.end()){
+            if(sizeof(lrulist) == capacity){
+                lrulist.pop_back();
+                lrumap.erase(lrulist.back().key);
+            }
+            lrulist.push_front(Node(key,value));
+            lrumap[key] = lrulist.begin();
+        }else{
+            lrulist.splice(lrulist.begin(), lrulist,lrumap[key]);
+            lrumap[key] = lrulist.begin();
+            lrumap[key]->value = value;
+        }
+    }
+};
 int main(int argc, const char * argv[]) {
-//    Algorithm algorithm;
-//    vector<int> A={1,2,3,4,5,7,8,9};
-//    cout<<algorithm.findTheMissing(A)<<endl;
-    cout<<sizeof(int)<<endl;
+    //    Algorithm algorithm;
+    //    vector<int> A={1,2,3,4,5,7,8,9};
+    //    cout<<algorithm.findTheMissing(A)<<endl;
+//    cout<<sizeof(int)<<endl;
+//    LRUcache A(10);
     
     return 0;
     
