@@ -11,6 +11,7 @@
 #include <unordered_map>
 #include <numeric>
 #include <list>
+#include <string>
 using namespace std;
 // ListNode
 struct ListNode{
@@ -344,14 +345,14 @@ public:
         vector<int> increment(n);
         for(int i = 1, inc = 1; i < n; i++){
             if(rating[i] > rating[i-1])
-                //                increment[i] = max(inc++, increment[i]);
+                // increment[i] = max(inc++, increment[i]);
                 increment[i] = inc++ ;
             else
                 inc = 1;
         }
         for(int i = n-2, inc = 1; i >= 0; i--){
             if(rating[i] > rating[i+1]){
-                //                increment[i] = max(inc++,increment[i]);
+                // increment[i] = max(inc++,increment[i]);
                 increment[i] = inc++ ;
             }else{ inc = 1;}
         }
@@ -630,7 +631,7 @@ private:
     static int binary_to_gray(int i){
         return i ^ (i >> 1);
     }
-    //24. remove duplicates from sorted list
+    //34. remove duplicates from sorted list 25/12/2016
     static void recur(ListNode *prev, ListNode *cur){
         if(cur == nullptr) return;
         if(prev->val == cur->val){
@@ -641,8 +642,38 @@ private:
             recur(prev->next,cur->next);
         }
     }
+/******************** 字符串 ******************************/
+    //36. palindroma 25/12/2016
+    bool isPalindraoma(string s){
+        transform(s.begin(), s.end(), s.begin(), ::tolower);
+        int left = 0;
+        int right = int(s.size() - 1);
+        while(left < right){
+            if(!isalnum(s[left])) left++;
+            else if(!isalnum(s[right])) right--;
+            else if(s[left] != s[right]) return false;
+            else{left++; right--;}
+        }
+        return true;
+    }
+    //37. Implement strStr 25/12/2016
+    int strStr(string &haystatck, string &niddle){
+        if(niddle.empty()) return 0;
+        const int n = int(haystatck.size() - niddle.size() +1);
+        for(int i = 0; i < n; i++){
+            int j = i;
+            int k =0;
+            while(j < haystatck.size() && k < niddle.size() && haystatck[j] == niddle[k]){
+                j++;
+                k++;
+            }
+            if(k == niddle.size()) return i;
+        }
+        return -1;
+    }
 };
-class LRUcache{
+//35. LRUCache 25/12/2016
+class LRUCache{
 private:
     struct Node{
         int key;
@@ -653,7 +684,7 @@ private:
     list<Node> lrulist;
     unordered_map<int, list<Node>::iterator> lrumap;
 public:
-    LRUcache(int capacity):capacity(capacity){}
+    LRUCache(int capacity):capacity(capacity){}
     int get(int key){
         if(lrumap.find(key) == lrumap.end()) return -1;
         lrulist.splice(lrulist.begin(),lrulist,lrumap[key]);
@@ -674,6 +705,8 @@ public:
             lrumap[key]->value = value;
         }
     }
+    
+    
 };
 int main(int argc, const char * argv[]) {
     //    Algorithm algorithm;
