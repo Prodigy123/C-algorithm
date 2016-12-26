@@ -671,6 +671,91 @@ private:
         }
         return -1;
     }
+    //38. atoi 26/12/2016
+    int myAtoi(string &s){
+        int num = 0;
+        int sign = 1;
+        int i = 0;
+        const int size = int(s.size());
+        while(s[i] == ' ' && i < size) i++;
+        if(s[i] == '-') {sign = -1;i++;}
+        else if (s[i] == '+') {sign = 1;i++;}
+        for(;i < size; i++){
+            if(s[i] < '0' || s[i] > '9') break;
+            if(num > INT_MAX/10 || (num == INT_MAX/10 && s[i] - '0' > INT_MAX%10))
+               return sign == 1 ? INT_MAX : INT_MIN;
+            num = num*10 + s[i] - '0';
+        }
+        return num*sign;
+    }
+    //39. addBinary 26/12/2016
+    string addBinary(string a,string b){
+        string result;
+        int carry = 0;
+        const size_t size = a.size() > b.size() ? a.size() : b.size();
+        reverse(a.begin(), a.end());
+        reverse(b.begin(), b.end());
+        for(size_t i; i < size; i++){
+            const int ai = i < a.size() ? a[i] - '0' : 0;
+            const int bi = i < b.size() ? b[i] - '0' : 0;
+            const int val = (ai + bi + carry)%10;
+            carry = (ai + bi + carry)/10;
+            result.insert(result.begin(), val + '0');
+        }
+        if(carry == 1) result.insert(result.begin(), '1');
+        return result;
+    }
+    //40. longest palindromic substr 26/12/2016
+    string longestPalindormicSub(const string &s){
+        size_t maxLen = 1;
+        size_t start = 0;
+        const size_t n = s.size();
+        bool f[n][n];
+        fill_n(&f[0][0], n*n, false);
+        for(size_t i = 0;i < n; i++){
+            f[i][i] = true;
+            for(size_t j = 0; j < i; j++){
+                f[j][i] = (s[i] == s[j] && ((i - j < 2) || f[j+1][i-1]));
+                if(f[j][i] && maxLen < (i - j + 1)){
+                    maxLen = i -j + 1;
+                    start = j;
+                }
+            }
+        }
+        return s.substr(start,maxLen);
+    }
+    //41. longest common prefix 26/12/2016
+    string prefix(vector<string> &strs){
+        if(strs.empty()) return "";
+        const size_t nums = strs.size();
+        const size_t strSize = strs[0].size();
+        for(size_t i = 0; i < strSize; i++){
+            for(size_t j = 0; j < nums; j++){
+                if(strs[j][i] != strs[0][i]) return strs[0].substr(0,i);
+            }
+        }return strs[0];
+    }
+    //42. anagrams 26/12/2016
+    vector<string> anagram(vector<string>& strs){
+        vector<string> result;
+        unordered_map<string, vector<string>> record;
+        for(auto &str : strs){
+            string key = str;
+            sort(key.begin(),key.end());
+            record[key].push_back(str);
+        }
+        for(auto it = record.cbegin(); it!=record.cend();it++){
+            if(it->second.size() > 1) result.insert(result.end(), it->second.begin(),it->second.end());
+        }
+        return result;
+    }
+    //43. length of last word 26/12/2016
+    size_t lengthOfLastWord(string& str){
+        auto first = find_if(str.rbegin(),str.rend(),::isalpha);
+        auto last = find_if_not(first,str.rend(),::isalpha);
+        return distance(first, last);
+    
+    }
 };
 //35. LRUCache 25/12/2016
 class LRUCache{
@@ -706,7 +791,6 @@ public:
         }
     }
     
-    
 };
 int main(int argc, const char * argv[]) {
     //    Algorithm algorithm;
@@ -714,7 +798,7 @@ int main(int argc, const char * argv[]) {
     //    cout<<algorithm.findTheMissing(A)<<endl;
 //    cout<<sizeof(int)<<endl;
 //    LRUcache A(10);
-    
+    string s = "qdqdqdq";
     return 0;
     
 }
