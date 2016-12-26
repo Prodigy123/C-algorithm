@@ -5,19 +5,25 @@
 //  Created by 吉安 on 22/12/2016.
 //  Copyright © 2016 An Ji. All rights reserved.
 //
-
 #include <iostream>
 #include <vector>
 #include <unordered_map>
 #include <numeric>
 #include <list>
 #include <string>
+#include <stack>
 using namespace std;
 // ListNode
 struct ListNode{
     int val;
     ListNode *next;
     ListNode(int x): val(x), next(nullptr){}
+};
+struct TreeNode{
+    int val;
+    TreeNode *left;
+    TreeNode *right;
+    TreeNode(int x):val(x),left(nullptr),right(nullptr){}
 };
 class Algorithm{
 public:
@@ -599,7 +605,6 @@ public:
         cur->next = slow;
         return dummy.next;
     }
-    
     ListNode *reverseHalf(ListNode *head){
         ListNode *prev = head;
         for(ListNode *cur = head->next, *next = cur->next;
@@ -613,36 +618,7 @@ public:
         head->next = nullptr;
         return prev;
     }
-    //private methods
-private:
-    //3. find median from two sorted array O(log(m+n)) 22/12/2016
-    static int find_kth(vector<int>::const_iterator A, int m, vector<int>::const_iterator B, int n, int k){
-        if(m>n) return find_kth(B, n, A, m, k);
-        if(m == 0) return *(B+k-1);
-        if(k == 1) return min(*A,*B);
-        int ia = min(k/2,m), ib = k - ia;
-        if(*(A+ia-1) < *(B+ib-1))
-            return find_kth(A+ia, m-ia, B, n, k-ia);
-        else if(*(A+ia-1) > *(B+ib-1))
-            return find_kth(A, m, B+ib, n-ib, k-ib);
-        else
-            return A[ia-1];
-    }
-    static int binary_to_gray(int i){
-        return i ^ (i >> 1);
-    }
-    //34. remove duplicates from sorted list 25/12/2016
-    static void recur(ListNode *prev, ListNode *cur){
-        if(cur == nullptr) return;
-        if(prev->val == cur->val){
-            prev->next = cur->next;
-            delete cur;
-            recur(prev,prev->next);
-        }else{
-            recur(prev->next,cur->next);
-        }
-    }
-/******************** 字符串 ******************************/
+    /******************** 字符串 ******************************/
     //36. palindroma 25/12/2016
     bool isPalindraoma(string s){
         transform(s.begin(), s.end(), s.begin(), ::tolower);
@@ -683,7 +659,7 @@ private:
         for(;i < size; i++){
             if(s[i] < '0' || s[i] > '9') break;
             if(num > INT_MAX/10 || (num == INT_MAX/10 && s[i] - '0' > INT_MAX%10))
-               return sign == 1 ? INT_MAX : INT_MIN;
+                return sign == 1 ? INT_MAX : INT_MIN;
             num = num*10 + s[i] - '0';
         }
         return num*sign;
@@ -754,7 +730,189 @@ private:
         auto first = find_if(str.rbegin(),str.rend(),::isalpha);
         auto last = find_if_not(first,str.rend(),::isalpha);
         return distance(first, last);
+    }
+    int lengthOfCstr(const char *s){
+        int len = 0;
+        while(*s){
+            if(*s++ != ' '){
+                len++;
+            }else if(*s && *s++ != ' '){
+                len = 0;
+            }
+        }
+        return len;
+    }
+    /******************** 栈 ******************************/
+    //44. parenthesis
+    bool isValid(string& str){
+        string left = "([{";
+        string right = "}])";
+        stack<char> stk;
+        for(auto c : str){
+            if(left.find(c) != left.npos){
+                stk.push(c);
+            }else if(stk.empty() || stk.top() != left[right.find(c)]){
+                return false;
+            }else{stk.pop();}
+        }
+        return stk.empty();
+    }
+    //45. longest parenthesis
+    int longestParenthesis(const string& str){
+        int maxLen = 0;
+        int last = -1;
+        const int size = int(str.size());
+        stack<int> stk;
+        for(int i = 0; i < size; i++){
+            if(str[i] == '('){
+                stk.push(i);
+            }else{
+                if(stk.empty()){
+                    last = i;
+                }else{
+                    stk.pop();
+                    if(stk.empty()){
+                        maxLen = i - last;
+                    }else{
+                        maxLen = i - stk.top();
+                    }
+                }
+            }
+        }
+        return maxLen;
+    }
+    //46. largest rectangle 26/12/2016
+    int largestRectangle(vector<int>& height){
+        int result = 0;
+        const int size = int(height.size());
+        height.push_back(0);
+        stack<int> stk;
+        for(int i = 0; i < size; ){
+            if(stk.empty() || height[i] > height[stk.top()]){
+                stk.push(i++);
+            }else{
+                int tmp = stk.top();
+                stk.pop();
+                result = max(result, height[tmp] * (stk.empty() ? i : i - stk.top() -1));
+            }
+        }
+        return result;
+    }
+    //47. evaRPN
+    string evaRPN(vector<string>& tokens){
+        stack<string> stk;
+        for(auto token : tokens){
+            if(!is_operand(token)){
+                stk.push(token);
+            }else{
+                int x = stoi(stk.top());
+                stk.pop();
+                int y = stoi(stk.top());
+                stk.pop();
+                if(token[0] == '+') y += x;
+                else if(token[0] == '-') y -= x;
+                else if(token[0] == '*') y *=x;
+                else y /=x;
+                stk.push(to_string(y));
+            }
+        }
+        return  stk.top();
+    }
+    bool is_operand(string &token){
+        return (token.size() == 1 && string("+-*/").find(token) != string("+-*/").npos);
+    }
+    /******************** Tree ******************************/
+    // 48. preorder 26/12/2016
+    vector<int> preorderTraversal(TreeNode *root){
+        vector<int> result;
+        stack<TreeNode* > stk;
+        if(root) stk.push(root);
+        while(!stk.empty()){
+            TreeNode *p = stk.top();
+            stk.pop();
+            result.push_back(p->val);
+            if(p->right != nullptr) stk.push(p->right);
+            if(p->left != nullptr) stk.push(p->left);
+        }
+        return result;
+    }
+    //49. inorder 26/12/2016
+    vector<int> inordertraversal(TreeNode *root){
+        vector<int> result;
+        stack<TreeNode*> stk;
+        TreeNode *p = root;
+        while(!stk.empty() || p!= nullptr){
+            if(p != nullptr){
+                stk.push(p);
+                p = p->left;
+            }else{
+                p = stk.top();
+                stk.pop();
+                result.push_back(p->val);
+                p = p->right;
+            }
+        }return result;
+    }
+    //50. postorder 26/12/2016
+    vector<int> postOrder(TreeNode *root){
+        vector<int> result;
+        stack<TreeNode*> stk;
+        TreeNode *p = root;// now pointer
+        TreeNode *q = nullptr; // used pointer
+        do{
+            while (p != nullptr) {
+                stk.push(p);
+                p = p->left;
+            }
+            q = nullptr;
+            while(!stk.empty()){
+                p = stk.top();
+                stk.pop();
+                if (p->right == q){
+                    result.push_back(p->val);
+                    q = p;
+                }else{
+                    stk.push(p);
+                    p = p->right;
+                    break;
+                }
+            }
+        }while(!stk.empty());
+        return result;
+    }
     
+    
+    /****************************************************************************************************************/
+    /****************************************************************************************************************/
+    
+    //private methods
+private:
+    //3. find median from two sorted array O(log(m+n)) 22/12/2016
+    static int find_kth(vector<int>::const_iterator A, int m, vector<int>::const_iterator B, int n, int k){
+        if(m>n) return find_kth(B, n, A, m, k);
+        if(m == 0) return *(B+k-1);
+        if(k == 1) return min(*A,*B);
+        int ia = min(k/2,m), ib = k - ia;
+        if(*(A+ia-1) < *(B+ib-1))
+            return find_kth(A+ia, m-ia, B, n, k-ia);
+        else if(*(A+ia-1) > *(B+ib-1))
+            return find_kth(A, m, B+ib, n-ib, k-ib);
+        else
+            return A[ia-1];
+    }
+    static int binary_to_gray(int i){
+        return i ^ (i >> 1);
+    }
+    //34. remove duplicates from sorted list 25/12/2016
+    static void recur(ListNode *prev, ListNode *cur){
+        if(cur == nullptr) return;
+        if(prev->val == cur->val){
+            prev->next = cur->next;
+            delete cur;
+            recur(prev,prev->next);
+        }else{
+            recur(prev->next,cur->next);
+        }
     }
 };
 //35. LRUCache 25/12/2016
@@ -790,14 +948,13 @@ public:
             lrumap[key]->value = value;
         }
     }
-    
 };
 int main(int argc, const char * argv[]) {
     //    Algorithm algorithm;
     //    vector<int> A={1,2,3,4,5,7,8,9};
     //    cout<<algorithm.findTheMissing(A)<<endl;
-//    cout<<sizeof(int)<<endl;
-//    LRUcache A(10);
+    //    cout<<sizeof(int)<<endl;
+    //    LRUcache A(10);
     string s = "qdqdqdq";
     return 0;
     
