@@ -12,6 +12,7 @@
 #include <list>
 #include <string>
 #include <stack>
+#include <queue>
 using namespace std;
 // ListNode
 struct ListNode{
@@ -880,11 +881,160 @@ public:
         }while(!stk.empty());
         return result;
     }
+    //51. level traversal 27/12/2016
+    vector<vector<int>> level(TreeNode* root){
+        vector<vector<int>> result;
+        traverse(root, 1, result);
+        return result;
+    }
+    void traverse(TreeNode *root, size_t level,vector<vector<int>> &result){
+        if(!root) return;
+        if(level > result.size()){
+            result.push_back(vector<int>());
+        }
+        result[level-1].push_back(root->val);
+        traverse(root->left, level+1, result);
+        traverse(root->right, level+1, result);
+    }
+    //52. level traversal 27/12/2016
+    vector<vector<int>> level2(TreeNode *root){
+        vector<vector<int>> result;
+        queue<TreeNode*> current, next;
+        current.push(root);
+        while(!current.empty()){
+            vector<int> level;
+            while (!current.empty()) {
+                TreeNode *tmp = current.front();
+                current.pop();
+                level.push_back(tmp->val);
+                if(tmp->left != nullptr) next.push(tmp->left);
+                if(tmp->right != nullptr) next.push(tmp->right);
+            }
+            result.push_back(level);
+            swap(current, next);
+        }
+        return result;
+    }
+    //53 zigzag 27/12/2016
+    vector<vector<int>> zigzag(TreeNode *root){
+        vector<vector<int>> result;
+        queue<TreeNode*> currrent, next;
+        currrent.push(root);
+        bool left_to_right = true;
+        while(!currrent.empty()){
+            vector<int> level;
+            while(!currrent.empty()){
+                TreeNode *tmp = currrent.front();
+                currrent.pop();
+                level.push_back(tmp->val);
+                if(tmp->left != nullptr) next.push(tmp->left);
+                if(tmp->right != nullptr) next.push((tmp->right));
+            }
+            if(!left_to_right) reverse(level.begin(),level.end());
+            result.push_back(level);
+            left_to_right = !left_to_right;
+            swap(currrent, next);
+        }
+        return result;
+    }
     
+    //54. isSameTree 27/12/2016
+    bool isSame(TreeNode *p, TreeNode *q){
+        if(!p && !q) return true;
+        if(!p || !q) return false;
+        return p->val == q->val && isSame(p->left, q->left) && isSame(p->right, q->right);
+    }
+    bool isSame2(TreeNode *root1, TreeNode *root2){
+        stack<TreeNode*> stk;
+        stk.push(root2);
+        stk.push(root1);
+        while(!stk.empty()){
+            TreeNode *p = stk.top();
+            stk.pop();
+            TreeNode *q = stk.top();
+            stk.pop();
+            if(!p && !q) continue;
+            if(!p || !q) return false;
+            if(p->val != q->val) return false;
+            stk.push(p->left);
+            stk.push(q->left);
+            stk.push(p->right);
+            stk.push(q->right);
+        }
+        return true;
+    }
+    //55. symmetric tree  27/12/2016
+    bool isSymmetric(TreeNode *root){
+        if(!root) return true;
+        return isSymmetric(root->left, root->right);
+    }
+    bool isSymmetric(TreeNode *left, TreeNode *right){
+        if(!left && !right) return true;
+        if(!left || !right) return false;
+        return left->val == right->val && isSymmetric(left->left, right->right) && isSymmetric(left->right, right->left);
+    }
     
+    bool isSymmetric2(TreeNode *root){
+        stack<TreeNode*>stk;
+        stk.push(root->left);
+        stk.push(root->right);
+        while(!stk.empty()){
+            TreeNode *p = stk.top();
+            stk.pop();
+            TreeNode *q = stk.top();
+            stk.pop();
+            if(!p && !q) continue;
+            if(!p || !q) return false;
+            if(p->val != q->val) return false;
+            stk.push(p->left);
+            stk.push(q->right);
+            stk.push(p->right);
+            stk.push(q->left);
+        }
+        return true;
+    }
+    //56. determine balanced tree
+    bool isBalenced(TreeNode *root){
+        return heightForSubtree(root) >= 0;
+    }
+    int heightForSubtree(TreeNode *root){
+        if(!root) return 0;
+        int left = heightForSubtree(root->left);
+        int right = heightForSubtree(root->right);
+        if(left < 0 || right < 0 || abs(left - right) > 1) return -1;
+        return max(left, right) + 1;
+    }
+    // 57. flatten binary tree to linked list 27/12/2016
+    void faltten(TreeNode* root){
+        stack<TreeNode*> stk;
+        stk.push(root);
+        while(!stk.empty()){
+            auto p = stk.top();
+            stk.pop();
+            if(p->right) stk.push(p->right);
+            if(p->left) stk.push(p->left);
+            p->left = nullptr;
+            if(!stk.empty())
+                p->right = stk.top();
+        }
+    }
+    //58. minimum depth 28/12/2016 
+    int minDepth(TreeNode *root){
+        return minDepth(root, false);
+    }
+    int minDepth(const TreeNode *root, bool hasbrother){
+        if(!root) return hasbrother? INT_MAX : 0;
+        return 1+min(minDepth(root->left, root->right != nullptr), minDepth(root->right, root->left != nullptr));
+    }
     /****************************************************************************************************************/
     /****************************************************************************************************************/
-    
+    //59. path sum 28／12/2016
+    bool hasPathSum(TreeNode *root, int sum){
+        if(!root) return false;
+        if(root->left ==nullptr && root->right == nullptr) return root->val == sum;
+        return hasPathSum(root->left, sum-root->val) || hasPathSum(root->right, sum-root->val);
+        
+    }
     //private methods
 private:
     //3. find median from two sorted array O(log(m+n)) 22/12/2016
@@ -956,6 +1106,7 @@ int main(int argc, const char * argv[]) {
     //    cout<<sizeof(int)<<endl;
     //    LRUcache A(10);
     string s = "qdqdqdq";
+    cout<<s.size()<<endl;
     return 0;
     
 }
