@@ -1026,8 +1026,6 @@ public:
         if(!root) return hasbrother? INT_MAX : 0;
         return 1+min(minDepth(root->left, root->right != nullptr), minDepth(root->right, root->left != nullptr));
     }
-    /****************************************************************************************************************/
-    /****************************************************************************************************************/
     //59. path sum 28／12/2016
     bool hasPathSum(TreeNode *root, int sum){
         if(!root) return false;
@@ -1035,7 +1033,20 @@ public:
         return hasPathSum(root->left, sum-root->val) || hasPathSum(root->right, sum-root->val);
         
     }
-    //private methods
+    //60. merge sorted array 29/12/2016
+    void merge(vector<int>& A, int m, vector<int>& B, int n){
+        int ia = m - 1;int ib = n - 1;int icur = m + n - 1;
+        while(ia >= 0 && ib >= 0){
+            A[icur--] = A[ia--] > B[ib--]? A[ia--] : B[ib--];
+        }
+        if(ib >= 0){
+            A[icur--] = B[ib--];
+        }
+    }
+    
+    /****************************************************************************************************************/
+    /****************************************************************************************************************/
+        //private methods
 private:
     //3. find median from two sorted array O(log(m+n)) 22/12/2016
     static int find_kth(vector<int>::const_iterator A, int m, vector<int>::const_iterator B, int n, int k){
