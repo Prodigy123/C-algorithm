@@ -1,1 +1,1 @@
-30 Days Leetcode !
+Leetcode !
